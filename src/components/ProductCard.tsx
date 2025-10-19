@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { Product, RecommendedProduct } from '@/types';
-import { extractGenText, normalizeCategories, normalizeImages, similarProducts } from '@/lib/api';
+import { extractGenText, normalizeCategories, normalizeImages, parsePrice, similarProducts } from '@/lib/api';
 
 interface Props {
   item: RecommendedProduct | { product: Product; score?: number };
@@ -21,7 +21,7 @@ export default function ProductCard({ item, showSimilarButton = true }: Props) {
     setError(null);
     try {
       const resp = await similarProducts(product.uniq_id, 6);
-      setSimilars(resp.items ?? []);
+      setSimilars(resp.similar_products ?? []);
     } catch (e: any) {
       console.error('Error fetching similar products:', e);
       setError(e.message || 'Failed to load similar products');
@@ -64,10 +64,15 @@ export default function ProductCard({ item, showSimilarButton = true }: Props) {
 
         {product.price && (
           <div className="price">
-            ₹{parseFloat(product.price).toLocaleString('en-IN', {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
+            {(() => {
+              const priceNum = parsePrice(product.price);
+              return priceNum !== null 
+                ? `₹${priceNum.toLocaleString('en-IN', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  })}`
+                : product.price;
+            })()}
           </div>
         )}
 

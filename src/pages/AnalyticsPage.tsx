@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import { analytics, analyticsProducts, normalizeCategories } from '@/lib/api';
-import type { AnalyticsResponse, Product } from '@/types';
+import { analytics, getAllProducts, normalizeCategories, parsePrice } from '@/lib/api';
+import type { Analytics, Product } from '@/types';
 import { Bar } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -15,7 +15,7 @@ import {
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend, Title);
 
 export default function AnalyticsPage() {
-  const [summary, setSummary] = useState<AnalyticsResponse | null>(null);
+  const [summary, setSummary] = useState<Analytics | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
@@ -27,11 +27,11 @@ export default function AnalyticsPage() {
       try {
         const [analyticsData, productData] = await Promise.all([
           analytics(),
-          analyticsProducts(),
+          getAllProducts(),
         ]);
 
         setSummary(analyticsData);
-        setProducts(productData?.products || []); // FIX: access "products" key
+        setProducts(productData.products || []);
       } catch (e: any) {
         console.error(e);
         setErr(e.message || 'Failed to load analytics');
@@ -94,8 +94,17 @@ export default function AnalyticsPage() {
           </div>
 
           <div className="kpi">
-            <div className="kpi-label">Top Brands Count</div>
-            <div className="kpi-value">{summary.top_brands?.length ?? '—'}</div>
+            <div className="kpi-label">Brands</div>
+            <div className="kpi-value">
+              {Object.keys(summary.brand_distribution || {}).length}
+            </div>
+          </div>
+
+          <div className="kpi">
+            <div className="kpi-label">Categories</div>
+            <div className="kpi-value">
+              {Object.keys(summary.categories_distribution || {}).length}
+            </div>
           </div>
         </div>
       )}
@@ -166,11 +175,10 @@ export default function AnalyticsPage() {
             <div title={p.title}>{p.title}</div>
             <div>{p.brand ?? '—'}</div>
             <div>
-              {p.price !== undefined
-                ? `$${Number(
-                    typeof p.price === 'string' ? (p.price as string).replace(/[^\d.]/g, '') : p.price
-                  ).toFixed(2)}`
-                : '—'}
+              {(() => {
+                const priceNum = parsePrice(p.price);
+                return priceNum !== null ? `$${priceNum.toFixed(2)}` : '—';
+              })()}
             </div>
             <div>{p.material ?? '—'}</div>
             <div>{p.color ?? '—'}</div>

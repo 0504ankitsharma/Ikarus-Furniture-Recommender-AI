@@ -80,7 +80,14 @@ export default function App() {
             <span className="footer-tagline">AI-Powered Furniture Discovery</span>
           </div>
           <div className="footer-info">
-            <span className="footer-link">Backend: https://0504ankitsharma-ikarus.hf.space</span>
+            <a 
+              href="https://0504ankitsharma-ikarus.hf.space/docs" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="footer-link"
+            >
+              API Docs: https://0504ankitsharma-ikarus.hf.space/docs
+            </a>
           </div>
         </div>
       </footer>

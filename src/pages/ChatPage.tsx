@@ -4,9 +4,7 @@ import { chatRecommendations, health } from '@/lib/api';
 import ProductCard from '@/components/ProductCard';
 
 export default function ChatPage() {
-  const [messages, setMessages] = useState<ChatMessage[]>([
-    { role: 'system', content: 'You are a helpful assistant recommending furniture.' },
-  ]);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
   const [backendOK, setBackendOK] = useState<boolean | null>(null);
@@ -62,32 +60,31 @@ export default function ChatPage() {
     const query = (customInput ?? input).trim();
     if (query.length === 0 || loading) return;
 
-    const nextMessages: ChatMessage[] = [...messages, { role: 'user', content: query }];
-    setMessages(nextMessages);
+    // Add user message with timestamp
+    const userMessage: ChatMessage = {
+      role: 'user',
+      content: query,
+      timestamp: new Date().toISOString(),
+    };
+
+    setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setLoading(true);
 
-    // Temporary “waiting” bubble
-    setMessages((prev) => [
-      ...prev,
-      { role: 'assistant', content: '⏳ Please wait a minute while I find the best recommendations for you...' },
-    ]);
-
     try {
-      const resp = await chatRecommendations({ messages: nextMessages, top_k: 8 });
-      // Remove the temporary waiting message
-      setMessages((prev) =>
-        prev.filter((m) => !m.content.includes('Please wait')) // remove temp bubble
-      );
-      if (resp.reply) {
-        setMessages((prev) => [...prev, { role: 'assistant', content: resp.reply! }]);
-      }
+      // Send to API with conversation history (excluding the waiting message)
+      const resp = await chatRecommendations(query, messages, 8);
+      
+      // Update messages with the response
+      setMessages(resp.conversation_history);
       setRecommendations(resp.recommendations ?? []);
     } catch (e: any) {
-      setMessages((prev) => [
-        ...prev,
-        { role: 'assistant', content: `Error: ${e.message}` },
-      ]);
+      const errorMessage: ChatMessage = {
+        role: 'assistant',
+        content: `Error: ${e.message}`,
+        timestamp: new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setLoading(false);
     }
@@ -142,16 +139,14 @@ export default function ChatPage() {
 
         {/* Chat Window */}
         <div className="chat-window">
-          {messages
-            .filter((m) => m.role !== 'system')
-            .map((m, idx) => (
-              <div key={idx} className={`bubble ${m.role}`}>
-                <div className="role">
-                  {m.role === 'user' ? 'You' : 'Assistant'}
-                </div>
-                <div className="content">{m.content}</div>
+          {messages.map((m, idx) => (
+            <div key={idx} className={`bubble ${m.role}`}>
+              <div className="role">
+                {m.role === 'user' ? 'You' : 'Assistant'}
               </div>
-            ))}
+              <div className="content">{m.content}</div>
+            </div>
+          ))}
 
           {/* Loading animation while waiting */}
           {loading && (
