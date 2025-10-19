@@ -1,77 +1,54 @@
-# Furniture Recommendation Frontend (React)
+# Furniture Recommendation Frontend 🪑
 
-Concise React + Vite + TypeScript frontend for your FastAPI backend:
-- Chat-style product recommendations with generated descriptions
-- Show recommended items with images and attributes
-- Fetch similar products
-- Analytics page with KPIs and charts
+Hey! I made this project as part of my **Ikarus assignment**.
+It’s a simple React + Vite + TypeScript frontend connected to my FastAPI backend on Hugging Face.
 
-Backend: [FastAPI on HF Spaces](https://0504ankitsharma-ikarus.hf.space)
+**Backend:** [https://0504ankitsharma-ikarus.hf.space](https://0504ankitsharma-ikarus.hf.space)
 
-## Features
+---
 
-- Recommendation chat
-  - POST `/api/recommendations/chat`
-  - Accumulates messages and shows recommendations
-- Similar products
-  - GET `/api/recommendations/similar/{product_id}`
-- Analytics
-  - GET `/api/analytics/` (summary)
-  - GET `/api/analytics/products` (full list)
-- Simple, clean UI and routing
+## What it does
 
-## Quickstart
+* Chat-style furniture recommendations
+* Shows product images and details
+* Option to find similar items
+* Basic analytics page with simple charts
 
-1. Prerequisites
-   - Node.js 18+
-   - pnpm / npm / yarn
+---
 
-2. Install
-   ```bash
-   pnpm install
-   # or: npm install
-   ```
+## How to run
 
-3. Configure (optional)
-   Copy `.env.example` to `.env` and adjust:
-   ```bash
-   VITE_API_BASE_URL=https://0504ankitsharma-ikarus.hf.space
-   ```
+Make sure you have **Node.js 18+**.
 
-4. Run
-   ```bash
-   pnpm dev
-   # open http://localhost:5173
-   ```
+```bash
+npm install
+npm run dev
+# open http://localhost:5173
+```
 
-5. Build
-   ```bash
-   pnpm build
-   pnpm preview
-   ```
+If needed, update `.env`:
 
-## Project Structure
+```
+VITE_API_BASE_URL=https://0504ankitsharma-ikarus.hf.space
+```
 
-- `src/pages/ChatPage.tsx` — Chat interface calling `/api/recommendations/chat`
-- `src/components/ProductCard.tsx` — Product display with "Find similar"
-- `src/pages/AnalyticsPage.tsx` — KPIs and charts from analytics endpoints
-- `src/lib/api.ts` — API client and data normalizers
-- `src/types.ts` — TypeScript interfaces matching your API schemas
-- `src/styles.css` — Minimal modern UI styling
+---
+
+## Main files
+
+* `src/pages/ChatPage.tsx` – main chat interface
+* `src/components/ProductCard.tsx` – shows product cards
+* `src/pages/AnalyticsPage.tsx` – analytics and charts
+
+---
 
 ## Notes
 
-- The frontend defaults to the provided backend URL. You can override via `.env`.
-- Images and categories are normalized (array or JSON string).
-- If CORS is restricted at the backend, you may need to enable it there.
-- This frontend assumes the following response shapes:
-  - `POST /api/recommendations/chat`: `{ reply?: string, recommendations?: RecommendedProduct[] }`
-  - `GET /api/recommendations/similar/{id}`: `{ items: RecommendedProduct[] }`
-  - `GET /api/analytics/`: summary metrics (see `src/types.ts`)
-  - `GET /api/analytics/products`: `Product[]`
+It’s just a simple demo for my assignment, so I kept the design clean and minimal.
+Built using **React**, **TypeScript**, and **Vite** — connected with my FastAPI backend.
 
-If your API returns slightly different field names, update `src/types.ts` and `src/lib/api.ts` mappings accordingly.
+---
 
-## License
+### License
 
 MIT
